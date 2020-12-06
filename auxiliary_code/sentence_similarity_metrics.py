@@ -1,7 +1,12 @@
 from nltk.metrics import jaccard_distance
 import numpy as np
 
-# Sentence data saved inside an array -> 0: original sentence; 1: sentence transformations; 2: tokens; 3: pos tags;  4: synsets
+# Sentence data saved inside an array:
+#     0: original sentence
+#     1: sentence transformations
+#     2: tokens
+#     3: pos tags
+#     4: synsets
 
 
 class SentenceSimilarity:
@@ -27,4 +32,37 @@ class SentenceSimilarity:
     # Auxiliary methods
 
     def jaccard_similarity(self, config, sentence1, sentence2):
-        return 1 - jaccard_distance(set(sentence1[2]),set(sentence2[2]))
+        return 1 - jaccard_distance(set(sentence1[2]), set(sentence2[2]))
+
+    def ngram_overlap(self, config, sentence1, sentence2):
+        n = config['n'] if 'n' in config else 1
+        content = config['content'] if 'content' in config else False
+
+        s1 = sentence1[2]
+        s2 = sentence2[2]
+
+        if content:
+            s1 = [sentence1[2][i]
+                  for i in range(len(sentence1[3]))
+                  if sentence1[3][i][0] in ['V', 'N', 'R', 'J']]
+            s2 = [sentence2[2][i]
+                  for i in range(len(sentence2[3]))
+                  if sentence2[3][i][0] in ['V', 'N', 'R', 'J']]
+
+        set1 = set()
+        set2 = set()
+        for i in range(len(s1)-n+1):
+            set1.add(tuple(s1[i:i+n]))
+        for i in range(len(s2)-n+1):
+            set2.add(tuple(s2[i:i+n]))
+
+        intersection = set1.intersection(set2)
+        sizei = len(intersection)
+        size1, size2 = len(set1), len(set2)
+        try:
+            return 2 * (1 / (size1 / sizei + size2 / sizei))
+        except ZeroDivisionError:
+            return 0
+
+
+
