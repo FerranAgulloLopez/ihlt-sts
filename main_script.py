@@ -14,18 +14,23 @@ print('Train values length:', len(train_sentence_pairs), '; Train labels length:
 print('Test values length:', len(test_sentence_pairs), '; Test labels length:', len(test_labels))
 
 config = {
-    'preprocessing_steps': [{'name': 'lower_case'},
-                            {'name': 'word_tokenize'},
-                            {'name': 'punctuation_removal'},
-                            {'name': 'pos_tagging'},
-                            {'name': 'lemmatization'}],
+    'preprocessing_steps': [
+        {'name': 'lower_case'},
+        {'name': 'word_tokenize'},
+        {'name': 'punctuation_removal'},
+        {'name': 'pos_tagging'},
+        {'name': 'lemmatization'},
+        {'name': 'word_sense_disambiguation'}
+    ],
     'similarity_metrics': [
         {'name': 'jaccard_similarity'},
         {'name': 'ngram_overlap', 'n': 2, 'content': False},
         {'name': 'ngram_overlap', 'n': 3, 'content': False},
         {'name': 'ngram_overlap', 'n': 1, 'content': True},
         {'name': 'ngram_overlap', 'n': 2, 'content': True},
-        {'name': 'ngram_overlap', 'n': 3, 'content': True}
+        {'name': 'ngram_overlap', 'n': 3, 'content': True},
+        # {'name': 'sentence_length_difference'},
+        {'name': 'wordnet_pairwise_word_similarity'}
     ],
     'aggregation': {'name': 'svm'}
 }
