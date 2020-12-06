@@ -19,8 +19,15 @@ config = {
                             {'name': 'punctuation_removal'},
                             {'name': 'pos_tagging'},
                             {'name': 'lemmatization'}],
-    'similarity_metrics': [{'name': 'jaccard_similarity'}],
-    'aggregation': {'name': 'mean'}
+    'similarity_metrics': [
+        {'name': 'jaccard_similarity'},
+        {'name': 'ngram_overlap', 'n': 2, 'content': False},
+        {'name': 'ngram_overlap', 'n': 3, 'content': False},
+        {'name': 'ngram_overlap', 'n': 1, 'content': True},
+        {'name': 'ngram_overlap', 'n': 2, 'content': True},
+        {'name': 'ngram_overlap', 'n': 3, 'content': True}
+    ],
+    'aggregation': {'name': 'svm'}
 }
 
 preprocessing = Preprocessing(config['preprocessing_steps'])
@@ -36,8 +43,8 @@ sentence_similarity = SentenceSimilarity(config['similarity_metrics'])
 train_results = sentence_similarity.compute_pair_comparison(train_output)
 test_results = sentence_similarity.compute_pair_comparison(test_output)
 
-train_results = run_aggregation_method(config['aggregation'], train_results)
-test_results = run_aggregation_method(config['aggregation'], test_results)
+train_results = run_aggregation_method(config['aggregation'], train_results, train_labels)
+test_results = run_aggregation_method(config['aggregation'], test_results, train_labels, test=True)
 
 print('Train results')
 print(train_results)
@@ -45,12 +52,13 @@ print('\nTest results')
 print(test_results)
 
 def show_scatter_plot(labels, results, title):
-    fig = plt.figure()
-    ax = fig.add_axes([0,0,1,1])
-    ax.scatter(labels, results)
-    ax.set_xlabel('Gold standard')
-    ax.set_ylabel('Jaccard similarity')
-    ax.set_title(title)
+    plt.figure()
+    plt.scatter(labels, results)
+    plt.xlim([0, 5])
+    plt.ylim([0, 1])
+    plt.xlabel('Gold standard')
+    plt.ylabel('Jaccard similarity')
+    plt.title(title)
     plt.show()
 
 print('Train results')
