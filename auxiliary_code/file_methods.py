@@ -38,7 +38,7 @@ def load_test_data():
 
 
 def load_values_file(path, array):
-    with open(path) as f:
+    with open(path, encoding='utf8') as f:
         data = f.read()
         splitted_data = re.split('\n+', data) # split raw data by tabs and end of lines
         if splitted_data[-1] == '':
@@ -50,7 +50,7 @@ def load_values_file(path, array):
 
 
 def load_labels_file(path, array):
-    with open(path) as f:
+    with open(path, encoding='utf8') as f:
         data = f.read()
         splitted_data = re.split('\n+', data) # split raw data by tabs and end of lines
         if splitted_data[-1] == '':
