@@ -13,13 +13,16 @@ def mean(config, scores, og_labels, models, test):
 
 
 def svm(config, scores, og_labels, models, test):
-    mms = MinMaxScaler()
+    mms_pred = MinMaxScaler()
+    mms_features = MinMaxScaler()
+    mms_features = mms_features.fit(scores)
+    scores = mms_features.transform(scores)
     if not test:
         models['svr'] = models['svr'].fit(scores, og_labels)
     predictions = models['svr'].predict(scores)
 
-    mms = mms.fit(np.reshape(predictions, (len(predictions), 1)))
-    predictions = mms.transform(np.reshape(predictions, (len(predictions), 1)))
+    mms_pred = mms_pred.fit(np.reshape(predictions, (len(predictions), 1)))
+    predictions = mms_pred.transform(np.reshape(predictions, (len(predictions), 1)))
     return np.reshape(predictions, (np.shape(predictions)[0], ))
 
 
