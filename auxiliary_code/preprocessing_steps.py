@@ -90,7 +90,9 @@ class Preprocessing:
         sentence[2] = output
         return sentence
 
-    def word_sense_disambiguation(self, tokens, tags):
+    def word_sense_disambiguation(self, sentence):
+        tokens = sentence[2]
+        tags = sentence[3]
         # TODO update
         output = []
         for index, token in enumerate(tokens):
@@ -100,4 +102,5 @@ class Preprocessing:
                 output.append(token)
             else:
                 output.append(synset)
-        return output
+        sentence.append(output)
+        return sentence
