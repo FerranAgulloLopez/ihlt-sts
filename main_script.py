@@ -82,9 +82,9 @@ def show_scatter_plot(labels, results, title):
     plt.figure()
     plt.scatter(labels, results)
     plt.xlim([0, 5])
-    plt.ylim([0, 1])
+    plt.ylim([0, 5])
     plt.xlabel('Gold standard')
-    plt.ylabel('Jaccard similarity')
+    plt.ylabel('Similarity')
     plt.title(title)
     plt.show()
 
