@@ -24,15 +24,37 @@ config = {
     ],
     'similarity_metrics': [
         {'name': 'jaccard_similarity'},
-        {'name': 'ngram_overlap', 'n': 2, 'content': False},
-        {'name': 'ngram_overlap', 'n': 3, 'content': False},
-        {'name': 'ngram_overlap', 'n': 1, 'content': True},
-        {'name': 'ngram_overlap', 'n': 2, 'content': True},
-        {'name': 'ngram_overlap', 'n': 3, 'content': True},
-        # {'name': 'sentence_length_difference'},
-        {'name': 'wordnet_pairwise_word_similarity'}
+        {'name': 'ngram_overlap', 'n': 2, 'filter': 'none'},
+        {'name': 'ngram_overlap', 'n': 3, 'filter': 'none'},
+        {'name': 'ngram_overlap', 'n': 1, 'filter': 'content'},
+        {'name': 'ngram_overlap', 'n': 2, 'filter': 'content'},
+        {'name': 'ngram_overlap', 'n': 3, 'filter': 'content'},
+        {'name': 'ngram_overlap', 'n': 4, 'filter': 'content'},
+        {'name': 'ngram_overlap', 'n': 1, 'filter': 'stopwords'},
+        {'name': 'ngram_overlap', 'n': 2, 'filter': 'stopwords'},
+        {'name': 'ngram_overlap', 'n': 3, 'filter': 'stopwords'},
+        {'name': 'ngram_overlap', 'n': 4, 'filter': 'stopwords'},
+        {'name': 'ngram_overlap', 'n': 5, 'filter': 'stopwords'},
+        {'name': 'pos_ngram_overlap', 'n': 1},
+        {'name': 'pos_ngram_overlap', 'n': 2},
+        {'name': 'character_ngram_overlap', 'n': 2},
+        {'name': 'character_ngram_overlap', 'n': 3},
+        {'name': 'character_ngram_overlap', 'n': 4},
+        {'name': 'character_ngram_overlap', 'n': 5},
+        {'name': 'character_ngram_overlap', 'n': 6},
+        {'name': 'character_ngram_overlap', 'n': 7},
+        {'name': 'character_ngram_overlap', 'n': 8},
+        {'name': 'character_ngram_overlap', 'n': 9},
+        {'name': 'sentence_length_difference'},
+        {'name': 'wordnet_pairwise_word_similarity', 'metric': 'lch'},
+        {'name': 'wordnet_pairwise_word_similarity', 'metric': 'path'},
+        # {'name': 'wordnet_pairwise_word_similarity', 'metric': 'wup'},
+        {'name': 'number_overlap'},
+        {'name': 'dependency_overlap', 'content': False},
+        # {'name': 'longest_common_subsequence', 'mode': 'subsequence'},
+        {'name': 'longest_common_subsequence', 'mode': 'substring'}
     ],
-    'aggregation': {'name': 'svm'}
+    'aggregation': {'name': 'krr'}
 }
 
 preprocessing = Preprocessing(config['preprocessing_steps'])
