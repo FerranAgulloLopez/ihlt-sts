@@ -8,6 +8,7 @@ from nltk.stem import WordNetLemmatizer
 import pylcs
 import numpy as np
 from word2number import w2n
+import math
 
 # Sentence data saved inside an array:
 #     0: original sentence
@@ -25,6 +26,10 @@ class SentenceSimilarity:
     # Main methods
 
     def compute_pair_comparison(self, sentence_pairs):
+        metric_names = {x['name'] for x in self.metrics}
+        if 'wordnet_pairwise_word_similarity_weighted' in metric_names:
+            self.word_idfs = self._compute_word_idfs(sentence_pairs)
+
         output = np.zeros((len(sentence_pairs), len(self.metrics)))
         for index, pair in enumerate(sentence_pairs):
             output[index] = self.run_sentence_similarity_metrics(self.metrics, pair[0], pair[1])
@@ -49,6 +54,33 @@ class SentenceSimilarity:
         return [word
                 for word in sentence[2]
                 if word in stopword_list]
+
+    def _idf_process_sentence(self, sentence, word_apparitions):
+        found_words = {}
+        for word in sentence[2]:
+            if word not in word_apparitions:
+                word_apparitions[word] = 1
+                found_words[word] = True
+            elif word not in found_words:
+                word_apparitions[word] += 1
+                found_words[word] = True
+        return word_apparitions
+
+    def _compute_word_idfs(self, sentence_pairs):
+        # TODO can be done in O(n), better than O(2n)
+
+        # Compute word apparitions in the sentences
+        word_apparitions = {}
+        for sentence1, sentence2 in sentence_pairs:
+            word_apparitions = self._idf_process_sentence(sentence1, word_apparitions)
+            word_apparitions = self._idf_process_sentence(sentence2, word_apparitions)
+
+        # Compute idf
+        word_idfs = {}
+        number_sentences = len(sentence_pairs)*2
+        for word, apparitions in word_apparitions.items():
+            word_idfs[word] = math.log(number_sentences/float(apparitions))
+        return word_idfs
 
     def jaccard_similarity(self, config, sentence1, sentence2):
         return 1 - jaccard_distance(set(sentence1[2]), set(sentence2[2]))
@@ -146,6 +178,35 @@ class SentenceSimilarity:
                         if similarity is not None:
                             max_similarity = max(similarity, max_similarity)
                 similarities.append(max_similarity)
+            return similarities
+
+        scores1 = _compute_sentence_similarities(sentence1, sentence2)
+        scores2 = _compute_sentence_similarities(sentence2, sentence1)
+        if scores1 == [] or scores2 == []:
+            return 0
+        score1, score2 = np.mean(scores1), np.mean(scores2)
+        return np.mean([score1, score2])
+
+    def wordnet_pairwise_word_similarity_weighted(self, config, sentence1, sentence2):
+        # TODO wrap this function inside the prior one
+        lch = lambda w1, w2: w1.lch_similarity(w2)
+        path = lambda w1, w2: w1.path_similarity(w2)
+        wup = lambda w1, w2: w1.wup_similarity(w2)
+        metrics = {'lch': lch, 'path': path, 'wup': wup}
+        metric = config['metric'] if 'metric' in config else 'lch'
+
+        def _compute_sentence_similarities(s1, s2):
+            similarities = []
+            for index, word in enumerate(s1[4]):
+                if not isinstance(word, Synset):
+                    continue
+                max_similarity = 0
+                for other_word in s2[4]:
+                    if isinstance(other_word, Synset) and word.pos() == other_word.pos():
+                        similarity = metrics[metric](word, other_word)
+                        if similarity is not None:
+                            max_similarity = max(similarity, max_similarity)
+                similarities.append(max_similarity*self.word_idfs[s1[2][index]])
             return similarities
 
         scores1 = _compute_sentence_similarities(sentence1, sentence2)

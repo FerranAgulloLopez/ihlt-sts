@@ -8,7 +8,7 @@ class Preprocessing:
 
     def __init__(self, config):
         self.steps = config
-        step_names = [x['name'] for x in config]
+        step_names = {x['name'] for x in config}
 
         # Load the more common punctuation symbols
         if 'punctuation_removal' in step_names:

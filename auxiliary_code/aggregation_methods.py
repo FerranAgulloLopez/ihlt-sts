@@ -44,6 +44,15 @@ class MeanAggregationMethod(AggregationMethod):
         return values.mean(axis=1)
 
 
+class MaxAggregationMethod(AggregationMethod):
+
+    def train_model(self, values, labels):
+        return values.max(axis=1)
+
+    def test_model(self, values):
+        return values.max(axis=1)
+
+
 class SVMAggregationMethod(AggregationMethod):
 
     def __init__(self, config, train_values, train_labels, test_values, logger):
@@ -102,6 +111,8 @@ class AggregationMethodFactory():
         name = config['aggregation_method']['name']
         if name == 'mean':
             aggregation_method = MeanAggregationMethod(config, *args)
+        elif name == 'max':
+            aggregation_method = MaxAggregationMethod(config, *args)
         elif name == 'svm':
             aggregation_method = SVMAggregationMethod(config, *args)
         elif name == 'krr':
