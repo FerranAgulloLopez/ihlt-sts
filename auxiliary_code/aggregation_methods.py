@@ -3,7 +3,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer
 from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
-from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor
+from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor, ExtraTreesRegressor, VotingRegressor
 from sklearn.decomposition import PCA
 
 
@@ -132,6 +132,26 @@ class RandomForestAggregationMethod(AggregationMethod):
         return self.model.predict(values)
 
 
+class VotingAggregationMethod(AggregationMethod):
+
+    def __init__(self, config, train_values, train_labels, test_values, logger):
+        super().__init__(config, train_values, train_labels, test_values, logger)
+        self.model = VotingRegressor([
+            ('random_forest', SVR(kernel='rbf', gamma=0.1)),
+            ('krr', KernelRidge(kernel='rbf', gamma=0.1)),
+            ('ada', AdaBoostRegressor()),
+            ('rf', RandomForestRegressor()),
+            ('et', ExtraTreesRegressor())
+        ])
+
+    def train_model(self, values, labels):
+        self.model = self.model.fit(values, labels)
+        return self.model.predict(values)
+
+    def test_model(self, values):
+        return self.model.predict(values)
+
+
 class AggregationMethodFactory():
 
     def __init__(self):
@@ -152,6 +172,8 @@ class AggregationMethodFactory():
             aggregation_method = AdaBoostAggregationMethod(config, *args)
         elif name == 'random_forest':
             aggregation_method = RandomForestAggregationMethod(config, *args)
+        elif name == 'voting':
+            aggregation_method = VotingAggregationMethod(config, *args)
         else:
             raise Exception('The aggregation_method with name ' + name + ' does not exist')
         return aggregation_method
