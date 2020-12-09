@@ -42,5 +42,5 @@
         {"name": "number_overlap"},
         {"name": "longest_common_subsequence", "mode": "substring"}
     ],
-    "aggregation_method": {"name": "random_forest"}
+    "aggregation_method": {"name": "random_forest", "reduction": {"name": "pca", "n_components": 16}}
 }

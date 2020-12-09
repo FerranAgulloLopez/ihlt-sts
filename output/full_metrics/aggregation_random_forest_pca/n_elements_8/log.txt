@@ -1,0 +1,10 @@
+
+Aggregation method best params: {'criterion': 'mse', 'max_features': 'auto', 'min_samples_split': 2, 'n_estimators': 100}
+
+Correlation with Gold standard in the training set
+0.9815325390887486
+
+Correlation with Gold standard in the testing set
+0.7254064124086289
+
+Elapsed time during aggregation computation: 10.430649280548096

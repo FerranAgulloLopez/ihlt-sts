@@ -4,6 +4,7 @@ from sklearn.preprocessing import MinMaxScaler, PowerTransformer
 from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor
+from sklearn.decomposition import PCA
 
 
 class AggregationMethod():
@@ -18,6 +19,9 @@ class AggregationMethod():
         self.train_labels = train_labels
         self.logger = logger
 
+        if 'reduction' in config['aggregation_method'] and config['aggregation_method']['reduction']['name'] == 'pca':
+            self.train_values, self.test_values = self.do_pca_reduction(config['aggregation_method']['reduction'], self.train_values, self.test_values)
+
     def train(self):
         return self.standarize_predictions(self.train_model(self.train_values, self.train_labels))[:,0]
 
@@ -27,6 +31,11 @@ class AggregationMethod():
     def standarize_predictions(self, predictions):
         mms_pred = MinMaxScaler(feature_range=(0, 5))
         return mms_pred.fit_transform(np.reshape(predictions, (len(predictions), 1)))
+
+    def do_pca_reduction(self, config, train_values, test_values):
+        pca = PCA(n_components=config['n_components'])
+        pca.fit(train_values)
+        return pca.transform(train_values), pca.transform(test_values)
 
     def train_model(self, values, labels):
         raise Exception('Method not implemented in abstract class')
@@ -105,11 +114,14 @@ class RandomForestAggregationMethod(AggregationMethod):
 
     def __init__(self, config, train_values, train_labels, test_values, logger):
         super().__init__(config, train_values, train_labels, test_values, logger)
-        self.model = GridSearchCV(RandomForestRegressor(), param_grid={"n_estimators": [75, 100, 125, 150],
-                                                                "criterion": ["mse", "mae"],
+        self.model = GridSearchCV(RandomForestRegressor(), param_grid={"n_estimators": [100],
+                                                                #"criterion": ["mse", "mae"],
+                                                                "criterion": ["mse"],
                                                                 #"min_samples_leaf": [1, 0.1, 0.2, 0.4, 0.5],
-                                                                "min_samples_split": [2, 0.2, 0.4, 0.6, 0.8],
-                                                                "max_features": ["auto", "sqrt", "log2"]})
+                                                                #"min_samples_split": [2, 0.2, 0.4, 0.6, 0.8],
+                                                                "min_samples_split": [2, 0.2, 0.5, 0.8],
+                                                                #"max_features": ["auto", "sqrt", "log2"]
+                                                                "max_features": ["auto"]})
 
     def train_model(self, values, labels):
         self.model = self.model.fit(values, labels)
