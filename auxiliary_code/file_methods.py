@@ -1,4 +1,5 @@
 import re
+import json
 
 
 def load_train_data():
@@ -58,3 +59,14 @@ def load_labels_file(path, array):
         for score in splitted_data:
             array.append(float(score))
     return array
+
+
+def load_json(path):
+    with open(path) as file:
+        data = json.load(file)
+    return data
+
+def save_json(path, data):
+    path += '.json'
+    with open(path, 'w') as file:
+        json.dump(data, file, indent=2)
