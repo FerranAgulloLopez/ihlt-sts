@@ -27,7 +27,7 @@ class SentenceSimilarity:
 
     def compute_pair_comparison(self, sentence_pairs):
         metric_names = {x['name'] for x in self.metrics}
-        if 'wordnet_pairwise_word_similarity_weighted' in metric_names:
+        if 'wordnet_pairwise_word_similarity_weighted' in metric_names or 'ngram_overlap_weighted' in metric_names:
             self.word_idfs = self._compute_word_idfs(sentence_pairs)
 
         output = np.zeros((len(sentence_pairs), len(self.metrics)))
@@ -111,6 +111,37 @@ class SentenceSimilarity:
         size1, size2 = len(set1), len(set2)
         try:
             return 2 * (1 / (size1 / sizei + size2 / sizei))
+        except ZeroDivisionError:
+            return 0
+
+    def ngram_overlap_weighted(self, config, sentence1, sentence2):
+        # TODO wrap inside the previous function
+        n = config['n'] if 'n' in config else 1
+        filter = config['filter'] if 'filter' in config else 'none'
+
+        if filter == 'content':
+            s1 = self._filter_content_words(sentence1)
+            s2 = self._filter_content_words(sentence2)
+        elif filter == 'stopwords':
+            s1 = self._filter_stopwords(sentence1)
+            s2 = self._filter_stopwords(sentence2)
+        else:  # filter == 'none'
+            s1 = sentence1[2]
+            s2 = sentence2[2]
+
+        set1 = set()
+        set2 = set()
+        for i in range(len(s1)-n+1):
+            set1.add(tuple(s1[i:i+n]))
+        for i in range(len(s2)-n+1):
+            set2.add(tuple(s2[i:i+n]))
+
+        intersection = set1.intersection(set2)
+        mean_idf = np.mean(np.asarray([self.word_idfs[word[0]] for word in intersection])) if len(intersection) > 0 else 0
+        sizei = len(intersection)
+        size1, size2 = len(set1), len(set2)
+        try:
+            return (2 * (1 / (size1 / sizei + size2 / sizei)))*mean_idf # TODO find other way, to not destroy normalization between 0 and 1
         except ZeroDivisionError:
             return 0
 
