@@ -1,0 +1,10 @@
+
+Aggregation method best params: {'alpha': 0.01, 'gamma': 0.1}
+
+Correlation with Gold standard in the training set
+0.8575203915513512
+
+Correlation with Gold standard in the testing set
+0.704985898343953
+
+Elapsed time during aggregation computation: 39.28581523895264
