@@ -9,6 +9,9 @@
     ],
     "similarity_metrics": [
         {"name": "jaccard_similarity"},
+        {"name": "jaccard_similarity_stemmer"},
+        {"name": "cosine_similarity_tfidf"},
+        {"name": "ngram_overlap_weighted", "n": 1, "filter": "none"},
         {"name": "ngram_overlap", "n": 2, "filter": "none"},
         {"name": "ngram_overlap", "n": 3, "filter": "none"},
         {"name": "ngram_overlap", "n": 1, "filter": "content"},
@@ -33,6 +36,9 @@
         {"name": "sentence_length_difference"},
         {"name": "wordnet_pairwise_word_similarity", "metric": "lch"},
         {"name": "wordnet_pairwise_word_similarity", "metric": "path"},
+        {"name": "wordnet_pairwise_word_similarity_weighted", "metric": "lch"},
+        {"name": "wordnet_pairwise_word_similarity_weighted", "metric": "path"},
+        {"name": "wordnet_pairwise_word_similarity_weighted_all_possibilities", "metric": "path"},
         {"name": "number_overlap"},
         {"name": "longest_common_subsequence", "mode": "substring"}
     ],

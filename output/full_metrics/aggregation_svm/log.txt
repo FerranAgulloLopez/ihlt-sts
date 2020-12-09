@@ -2,9 +2,9 @@
 Aggregation method best params: {'C': 10, 'gamma': 1.0}
 
 Correlation with Gold standard in the training set
-0.905522385882371
+0.9382068525648446
 
 Correlation with Gold standard in the testing set
-0.7035859509795371
+0.7409191075360325
 
-Elapsed time during aggregation computation: 115.98371744155884
+Elapsed time during aggregation computation: 116.87935066223145
