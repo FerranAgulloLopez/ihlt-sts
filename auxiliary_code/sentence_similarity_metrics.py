@@ -10,6 +10,9 @@ import numpy as np
 from word2number import w2n
 import math
 from nltk.corpus import wordnet as wn
+from nltk.stem import PorterStemmer
+import string
+from scipy import spatial
 
 # Sentence data saved inside an array:
 #     0: original sentence
@@ -23,16 +26,24 @@ class SentenceSimilarity:
 
     def __init__(self, config):
         self.metrics = config
+        self.index = 0 # TODO refactor, necessary for cosine similarity
 
     # Main methods
 
     def compute_pair_comparison(self, sentence_pairs):
         metric_names = {x['name'] for x in self.metrics}
-        if 'wordnet_pairwise_word_similarity_weighted' in metric_names or 'ngram_overlap_weighted' in metric_names:
-            self.word_idfs = self._compute_word_idfs(sentence_pairs)
+        if 'wordnet_pairwise_word_similarity_weighted' in metric_names or 'ngram_overlap_weighted' in metric_names or 'cosine_similarity_tfidf' in metric_names:
+            self.word_idfs, self.sentence_tfidfs = self._compute_word_tfidfs(sentence_pairs)
+
+        if 'jaccard_similarity_stemmer' in metric_names:
+            self.stemmer = PorterStemmer()
+            self.punctuation_set = set(string.punctuation)
+            self.punctuation_set.add('``')
+            self.punctuation_set.add('\'\'')
 
         output = np.zeros((len(sentence_pairs), len(self.metrics)))
         for index, pair in enumerate(sentence_pairs):
+            self.index = index
             output[index] = self.run_sentence_similarity_metrics(self.metrics, pair[0], pair[1])
         return output
 
@@ -55,35 +66,58 @@ class SentenceSimilarity:
                 for word in sentence[2]
                 if word in stopword_list]
 
-    def _idf_process_sentence(self, sentence, word_apparitions):
-        found_words = {}
+    def _idf_process_sentence(self, sentence_id, sentence, corpus_word_apparitions, sentence_word_apparitions):
+        # compute df for each word and tf for each word and sentence
+        sentence_word_apparitions[sentence_id] = {}
         for word in sentence[2]:
-            if word not in word_apparitions:
-                word_apparitions[word] = 1
-                found_words[word] = True
-            elif word not in found_words:
-                word_apparitions[word] += 1
-                found_words[word] = True
-        return word_apparitions
+            if word not in corpus_word_apparitions:
+                corpus_word_apparitions[word] = 1
+                sentence_word_apparitions[sentence_id][word] = 1
+            elif word not in sentence_word_apparitions[sentence_id]:
+                corpus_word_apparitions[word] += 1
+                sentence_word_apparitions[sentence_id][word] = 1
+            elif word in sentence_word_apparitions[sentence_id]:
+                sentence_word_apparitions[sentence_id][word] += 1
+        return corpus_word_apparitions, sentence_word_apparitions
 
-    def _compute_word_idfs(self, sentence_pairs):
+    def _compute_word_tfidfs(self, sentence_pairs):
         # TODO can be done in O(n), better than O(2n)
 
         # Compute word apparitions in the sentences
-        word_apparitions = {}
-        for sentence1, sentence2 in sentence_pairs:
-            word_apparitions = self._idf_process_sentence(sentence1, word_apparitions)
-            word_apparitions = self._idf_process_sentence(sentence2, word_apparitions)
+        corpus_word_apparitions = {}
+        sentence_word_apparitions = {}
+        for index, (sentence1, sentence2) in enumerate(sentence_pairs):
+            corpus_word_apparitions, sentence_word_apparitions = self._idf_process_sentence(str(index) + '1', sentence1, corpus_word_apparitions, sentence_word_apparitions)
+            corpus_word_apparitions, sentence_word_apparitions = self._idf_process_sentence(str(index) + '2', sentence2, corpus_word_apparitions, sentence_word_apparitions)
 
-        # Compute idf
+        # Compute word idf and sentence tf-idf
         word_idfs = {}
+        sentence_tfidfs = {}
+        corpus_word_apparitions_ids = {word:index for index, word in enumerate(corpus_word_apparitions)}
         number_sentences = len(sentence_pairs)*2
-        for word, apparitions in word_apparitions.items():
-            word_idfs[word] = math.log(number_sentences/float(apparitions))
-        return word_idfs
+        for id, words in sentence_word_apparitions.items():
+            tfidfs = np.zeros(len(corpus_word_apparitions))
+            for word, apparitions_in_sentence in words.items():
+                apparitions_in_corpus = corpus_word_apparitions[word]
+                if word not in word_idfs:
+                    word_idfs[word] = math.log(number_sentences/(float(apparitions_in_corpus)+1))
+                index = corpus_word_apparitions_ids[word]
+                tfidfs[index] = apparitions_in_sentence*word_idfs[word]
+            sentence_tfidfs[id] = tfidfs
+        return word_idfs, sentence_tfidfs
 
     def jaccard_similarity(self, config, sentence1, sentence2):
         return 1 - jaccard_distance(set(sentence1[2]), set(sentence2[2]))
+
+    def jaccard_similarity_stemmer(self, config, sentence1, sentence2):
+        tokens1 = [self.stemmer.stem(token) for token in word_tokenize(sentence1[1]) if token not in self.punctuation_set]
+        tokens2 = [self.stemmer.stem(token) for token in word_tokenize(sentence2[1]) if token not in self.punctuation_set]
+        return 1 - jaccard_distance(set(tokens1), set(tokens2))
+
+    def cosine_similarity_tfidf(self, config, sentence1, sentence2):
+        id1 = str(self.index)  + '1'
+        id2 = str(self.index) + '2'
+        return 1 - spatial.distance.cosine(self.sentence_tfidfs[id1], self.sentence_tfidfs[id2])
 
     def ngram_overlap(self, config, sentence1, sentence2):
         n = config['n'] if 'n' in config else 1
