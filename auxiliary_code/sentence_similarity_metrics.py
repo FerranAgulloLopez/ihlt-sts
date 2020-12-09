@@ -9,6 +9,7 @@ import pylcs
 import numpy as np
 from word2number import w2n
 import math
+from nltk.corpus import wordnet as wn
 
 # Sentence data saved inside an array:
 #     0: original sentence
@@ -32,8 +33,8 @@ class SentenceSimilarity:
 
         output = np.zeros((len(sentence_pairs), len(self.metrics)))
         for index, pair in enumerate(sentence_pairs):
+            print(index)
             output[index] = self.run_sentence_similarity_metrics(self.metrics, pair[0], pair[1])
-            index += 1
         return output
 
     def run_sentence_similarity_metrics(self, metrics, sentence1, sentence2):
@@ -199,7 +200,7 @@ class SentenceSimilarity:
 
         def _compute_sentence_similarities(s1, s2):
             similarities = []
-            for word in s1[4]:
+            for word in s1[2]:
                 if not isinstance(word, Synset):
                     continue
                 max_similarity = 0
@@ -238,6 +239,42 @@ class SentenceSimilarity:
                         if similarity is not None:
                             max_similarity = max(similarity, max_similarity)
                 similarities.append(max_similarity*self.word_idfs[s1[2][index]])
+            return similarities
+
+        scores1 = _compute_sentence_similarities(sentence1, sentence2)
+        scores2 = _compute_sentence_similarities(sentence2, sentence1)
+        if scores1 == [] or scores2 == []:
+            return 0
+        score1, score2 = np.mean(scores1), np.mean(scores2)
+        return np.mean([score1, score2])
+
+    def wordnet_pairwise_word_similarity_weighted_all_possibilities(self, config, sentence1, sentence2):
+        lch = lambda w1, w2: w1.lch_similarity(w2)
+        path = lambda w1, w2: w1.path_similarity(w2)
+        wup = lambda w1, w2: w1.wup_similarity(w2)
+        metrics = {'lch': lch, 'path': path, 'wup': wup}
+        metric = config['metric'] if 'metric' in config else 'lch'
+
+        def _compute_sentence_similarities(s1, s2):
+            similarities = []
+            for index1, word in enumerate(s1[2]):
+                max_similarity = 0
+                tag1 = s1[3][index1][0].lower()
+                if tag1 == 'j': tag1 = 'a'
+                if tag1 in ['v', 'n', 'r', 'a']:
+                    synsets1 = wn.synsets(word, tag1)[:5]
+                    for synset1 in synsets1:
+                        for index2, other_word in enumerate(s2[2]):
+                            tag2 = s2[3][index2][0].lower()
+                            if tag2 == 'j': tag2 = 'a'
+                            if tag2 in ['v', 'n', 'r', 'a']:
+                                    synsets2 = wn.synsets(other_word, tag2)[:5]
+                                    for synset2 in synsets2:
+                                        if synset1.pos() == synset2.pos():
+                                            similarity = metrics[metric](synset1, synset2)
+                                            if similarity is not None:
+                                                max_similarity = max(similarity, max_similarity)
+                similarities.append(max_similarity*self.word_idfs[word])
             return similarities
 
         scores1 = _compute_sentence_similarities(sentence1, sentence2)
