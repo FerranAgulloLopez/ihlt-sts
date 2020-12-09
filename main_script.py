@@ -125,10 +125,6 @@ def main(config_path, output_path, _type, input_path):
         if output_path is not None:
             np.save(output_path + '/train_results', train_results)
             np.save(output_path + '/test_results', test_results)
-            np.save(output_path + '/metric_train_values', metric_train_values)
-            np.save(output_path + '/metric_test_values', metric_test_values)
-            np.save(output_path + '/train_labels', train_labels)
-            np.save(output_path + '/test_labels', test_labels)
             save_json(output_path + '/config', config)
     else:
         raise Exception('Type not recognized, read README file for details')
