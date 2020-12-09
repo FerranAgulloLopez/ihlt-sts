@@ -1,8 +1,0 @@
-
-Correlation with Gold standard in the training set
-0.06314602367619637
-
-Correlation with Gold standard in the testing set
-0.18998455490401972
-
-Elapsed time during aggregation computation: 0.9562294483184814

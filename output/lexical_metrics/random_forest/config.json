@@ -1,0 +1,116 @@
+{
+  "preprocessing_steps": [
+    {
+      "name": "lower_case"
+    },
+    {
+      "name": "word_tokenize"
+    },
+    {
+      "name": "punctuation_removal"
+    },
+    {
+      "name": "pos_tagging"
+    },
+    {
+      "name": "lemmatization"
+    },
+    {
+      "name": "word_sense_disambiguation"
+    }
+  ],
+  "similarity_metrics": [
+    {
+      "name": "jaccard_similarity"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 2,
+      "filter": "none"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 3,
+      "filter": "none"
+    },
+    {
+      "name": "ngram_overlap_weighted",
+      "n": 1,
+      "filter": "none"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 1,
+      "filter": "stopwords"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 2,
+      "filter": "stopwords"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 3,
+      "filter": "stopwords"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 4,
+      "filter": "stopwords"
+    },
+    {
+      "name": "ngram_overlap",
+      "n": 5,
+      "filter": "stopwords"
+    },
+    {
+      "name": "jaccard_similarity_stemmer"
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 2
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 3
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 4
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 5
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 6
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 7
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 8
+    },
+    {
+      "name": "character_ngram_overlap",
+      "n": 9
+    },
+    {
+      "name": "longest_common_subsequence",
+      "mode": "substring"
+    },
+    {
+      "name": "longest_common_subsequence",
+      "mode": "subsequence"
+    },
+    {
+      "name": "cosine_similarity_tfidf"
+    }
+  ],
+  "aggregation_method": {
+    "name": "random_forest"
+  }
+}

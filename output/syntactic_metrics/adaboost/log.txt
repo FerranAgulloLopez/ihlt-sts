@@ -1,0 +1,28 @@
+Train values length: 2234; Train labels length: 2234
+Test values length: 3108; Test labels length: 3108
+
+Sentence 1
+Original sentence: But other sources close to the sale said Vivendi was keeping the door open to further bids and hoped to see bidders interested in individual assets team up.
+Sentence transformation: but other sources close to the sale said vivendi was keeping the door open to further bids and hoped to see bidders interested in individual assets team up.
+Tokens: ['but', 'other', 'source', 'close', 'to', 'the', 'sale', 'say', 'vivendi', 'be', 'keep', 'the', 'door', 'open', 'to', 'further', 'bid', 'and', 'hop', 'to', 'see', 'bidder', 'interested', 'in', 'individual', 'asset', 'team', 'up']
+Pos tags: ['CC', 'JJ', 'NNS', 'RB', 'TO', 'DT', 'NN', 'VBD', 'NN', 'VBD', 'VBG', 'DT', 'NN', 'JJ', 'TO', 'JJ', 'NNS', 'CC', 'VBD', 'TO', 'VB', 'NNS', 'JJ', 'IN', 'JJ', 'NNS', 'VBP', 'RP']
+Synsets: ['but', 'other', Synset('reservoir.n.04'), Synset('near.r.01'), 'to', 'the', Synset('sale.n.05'), Synset('state.v.01'), 'vivendi', Synset('equal.v.01'), Synset('retain.v.02'), 'the', Synset('doorway.n.01'), 'open', 'to', 'further', Synset('bid.n.04'), 'and', Synset('hop.v.02'), 'to', Synset('visualize.v.01'), Synset('bidder.n.02'), 'interested', 'in', 'individual', Synset('asset.n.01'), Synset('team.v.01'), Synset('up.r.03')]
+
+Sentence 2
+Original sentence: But other sources close to the sale said Vivendi was keeping the door open for further bids in the next day or two.
+Sentence transformation: but other sources close to the sale said vivendi was keeping the door open for further bids in the next day or two.
+Tokens: ['but', 'other', 'source', 'close', 'to', 'the', 'sale', 'say', 'vivendi', 'be', 'keep', 'the', 'door', 'open', 'for', 'further', 'bid', 'in', 'the', 'next', 'day', 'or', 'two']
+Pos tags: ['CC', 'JJ', 'NNS', 'RB', 'TO', 'DT', 'NN', 'VBD', 'NN', 'VBD', 'VBG', 'DT', 'NN', 'JJ', 'IN', 'JJ', 'NNS', 'IN', 'DT', 'JJ', 'NN', 'CC', 'CD']
+Synsets: ['but', 'other', Synset('reservoir.n.04'), Synset('near.r.01'), 'to', 'the', Synset('sale.n.05'), Synset('pronounce.v.01'), 'vivendi', Synset('equal.v.01'), Synset('retain.v.02'), 'the', Synset('doorway.n.01'), 'open', 'for', 'further', Synset('command.n.01'), 'in', 'the', 'next', Synset('sidereal_day.n.01'), 'or', 'two']
+
+Elapsed time during metrics computation: 184.65420961380005
+
+Aggregation method best params: {'learning_rate': 0.1, 'n_estimators': 100}
+
+Correlation with Gold standard in the training set
+0.6189747513682979
+
+Correlation with Gold standard in the testing set
+0.4576196658895303
+
+Elapsed time during aggregation computation: 7.822081804275513

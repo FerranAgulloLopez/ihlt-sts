@@ -1,0 +1,39 @@
+{
+  "preprocessing_steps": [
+    {
+      "name": "lower_case"
+    },
+    {
+      "name": "word_tokenize"
+    },
+    {
+      "name": "punctuation_removal"
+    },
+    {
+      "name": "pos_tagging"
+    },
+    {
+      "name": "lemmatization"
+    },
+    {
+      "name": "word_sense_disambiguation"
+    }
+  ],
+  "similarity_metrics": [
+    {
+      "name": "pos_ngram_overlap",
+      "n": 1
+    },
+    {
+      "name": "pos_ngram_overlap",
+      "n": 2
+    },
+    {
+      "name": "dependency_overlap",
+      "content": 0
+    }
+  ],
+  "aggregation_method": {
+    "name": "svm"
+  }
+}
