@@ -3,7 +3,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer
 from sklearn.svm import SVR
 from sklearn.kernel_ridge import KernelRidge
-from sklearn.ensemble import AdaBoostRegressor
+from sklearn.ensemble import AdaBoostRegressor, RandomForestRegressor
 
 
 class AggregationMethod():
@@ -101,6 +101,25 @@ class AdaBoostAggregationMethod(AggregationMethod):
         return self.model.predict(values)
 
 
+class RandomForestAggregationMethod(AggregationMethod):
+
+    def __init__(self, config, train_values, train_labels, test_values, logger):
+        super().__init__(config, train_values, train_labels, test_values, logger)
+        self.model = GridSearchCV(RandomForestRegressor(), param_grid={"n_estimators": [75, 100, 125, 150],
+                                                                "criterion": ["mse", "mae"],
+                                                                #"min_samples_leaf": [1, 0.1, 0.2, 0.4, 0.5],
+                                                                "min_samples_split": [2, 0.2, 0.4, 0.6, 0.8],
+                                                                "max_features": ["auto", "sqrt", "log2"]})
+
+    def train_model(self, values, labels):
+        self.model = self.model.fit(values, labels)
+        self.logger.info('\nAggregation method best params: ' + str(self.model.best_params_))
+        return self.model.predict(values)
+
+    def test_model(self, values):
+        return self.model.predict(values)
+
+
 class AggregationMethodFactory():
 
     def __init__(self):
@@ -119,6 +138,8 @@ class AggregationMethodFactory():
             aggregation_method = KRRAggregationMethod(config, *args)
         elif name == 'ada_boost':
             aggregation_method = AdaBoostAggregationMethod(config, *args)
+        elif name == 'random_forest':
+            aggregation_method = RandomForestAggregationMethod(config, *args)
         else:
             raise Exception('The aggregation_method with name ' + name + ' does not exist')
         return aggregation_method
