@@ -1,0 +1,23 @@
+{
+    "preprocessing_steps": [
+        {"name": "lower_case"},
+        {"name": "word_tokenize"},
+        {"name": "punctuation_removal"},
+        {"name": "pos_tagging"},
+        {"name": "lemmatization"},
+        {"name": "word_sense_disambiguation"}
+    ],
+    "similarity_metrics": [
+        {"name": "ngram_overlap", "n": 1, "filter": "content"},
+        {"name": "ngram_overlap", "n": 2, "filter": "content"},
+        {"name": "ngram_overlap", "n": 3, "filter": "content"},
+        {"name": "ngram_overlap", "n": 4, "filter": "content"},
+        {"name": "wordnet_pairwise_word_similarity", "metric": "lch"},
+        {"name": "wordnet_pairwise_word_similarity", "metric": "path"},
+        {"name": "wordnet_pairwise_word_similarity_weighted", "metric": "lch"},
+        {"name": "wordnet_pairwise_word_similarity_weighted", "metric": "path"},
+        {"name": "wordnet_pairwise_word_similarity_weighted_all_possibilities", "metric": "lch"},
+        {"name": "wordnet_pairwise_word_similarity_weighted_all_possibilities", "metric": "path"}
+    ],
+    "aggregation_method": {"name": "random_forest"}
+}
