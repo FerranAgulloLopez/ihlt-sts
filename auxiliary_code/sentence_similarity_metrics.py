@@ -33,7 +33,6 @@ class SentenceSimilarity:
 
         output = np.zeros((len(sentence_pairs), len(self.metrics)))
         for index, pair in enumerate(sentence_pairs):
-            print(index)
             output[index] = self.run_sentence_similarity_metrics(self.metrics, pair[0], pair[1])
         return output
 
@@ -200,7 +199,7 @@ class SentenceSimilarity:
 
         def _compute_sentence_similarities(s1, s2):
             similarities = []
-            for word in s1[2]:
+            for word in s1[4]:
                 if not isinstance(word, Synset):
                     continue
                 max_similarity = 0
