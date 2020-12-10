@@ -22,7 +22,7 @@ Our approach contains the next three different steps:
 
 We use a Json object to define all the parameters of each experiment. In this way, it is only necessary to modify the json object to change the experiment configuration without touching any code. There are examples of configuration Jsons in the directory with path ./input/config_examples.
 
-## Files structure
+### Files structure
 
 - input: directory containing configuration examples and the data from the STS 2012 evaluation
 - output: directory containing the results of the experiments included in the presentation
