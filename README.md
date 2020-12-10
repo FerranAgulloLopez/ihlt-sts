@@ -26,7 +26,8 @@ We use a Json object to define all the parameters of each experiment. In this wa
 
 - input: directory containing configuration examples and the data from the STS 2012 evaluation
 - output: directory containing the results of the experiments included in the presentation
-- notebook: notebook containing the code for running the experiment with which we have obtained the best correlation score
+- sts-AdrianTormos-FerranAgullo.ipynb: notebook containing the code for running the experiment with which we have obtained the best correlation score
+- sts-AdrianTormos-FerranAgullo.pdf: the slides for the project presentation
 - run_script: python script to run experiments in a much easier fashion than the notebook
 - auxiliary_code: directory containing the important code, the implementation of all the preprocessing steps, similarity metrics and aggregation methods
     - preprocessing_steps: python file containing the code that implements the multiple preprocessing steps
@@ -46,7 +47,7 @@ We use a Json object to define all the parameters of each experiment. In this wa
 
 #### Notebook
 
-It is not necessary any special requirements to run the notebook
+No special requirements to run the notebook
 
 #### Script file
 
