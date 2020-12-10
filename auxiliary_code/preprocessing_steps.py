@@ -27,6 +27,9 @@ class Preprocessing:
     # Main methods
 
     def do_pipeline(self, sentence_pairs):
+        """
+        Preprocesses all sentence pairs in sentence_pairs.
+        """
         output = []
         for pair in sentence_pairs:
             sentence1, sentence2 = pair
@@ -38,26 +41,41 @@ class Preprocessing:
         return output
 
     def run_preprocessing_steps(self, steps, sentence):
+        """
+        Preprocesses a pair of sentences, using the steps in the steps parameter.
+        """
         for step in steps:
             sentence = self.run_preprocessing_step(step, sentence)
         return sentence
 
     def run_preprocessing_step(self, step, sentence):
+        """
+        Performs one preprocessing step to a sentence calling the corresponding function.
+        """
         return eval('self.' + step['name'])(sentence)
 
     # Auxiliary methods
 
     def lower_case(self, sentence):
+        """
+        Lowercases a sentence.
+        """
         # pre: the sentence in one string
         sentence[1] = sentence[1].lower()
         return sentence
 
     def word_tokenize(self, sentence):
+        """
+        Tokenizes a sentence.
+        """
         # pre: the sentence in one string
         sentence.append(nltk.word_tokenize(sentence[1]))
         return sentence
 
     def punctuation_removal(self, sentence):
+        """
+        Removes the punctuation of a sentence, using the token list.
+        """
         output = []
         for token in sentence[2]:
             if token not in self.punctuation_set:
@@ -66,6 +84,9 @@ class Preprocessing:
         return sentence
 
     def stopwords_removal(self, sentence):
+        """
+        Removes stopwords in a sentence, using the token list.
+        """
         output = []
         for token in sentence[2]:
             if token not in self.sw_set:
@@ -74,12 +95,18 @@ class Preprocessing:
         return sentence
 
     def pos_tagging(self, sentence):
+        """
+        Tags the part of speech of each word in a sentence.
+        """
         pairs = nltk.pos_tag(sentence[2])
         tags = [tag for token, tag in pairs]
         sentence.append(tags)
         return sentence
 
     def lemmatization(self, sentence):
+        """
+        Lemmatizes a sentence, using the tokens and PoS.
+        """
         output = []
         for index, token in enumerate(sentence[2]):
             tag = sentence[3][index]
@@ -91,6 +118,10 @@ class Preprocessing:
         return sentence
 
     def word_sense_disambiguation(self, sentence):
+        """
+        Performs word sense disambiguation using the Lesk algorithm to get a list of synsets. If a word doesn't have
+        a synset, the original word is preserved.
+        """
         tokens = sentence[2]
         tags = sentence[3]
         # TODO update

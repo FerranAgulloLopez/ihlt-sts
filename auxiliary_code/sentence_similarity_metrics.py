@@ -31,6 +31,10 @@ class SentenceSimilarity:
     # Main methods
 
     def compute_pair_comparison(self, sentence_pairs):
+        """
+        Computes, for every sentence pair in the list sentence_pairs, all metrics in the configuration.
+        If any metric requires it, the Tf-idf are computed.
+        """
         metric_names = {x['name'] for x in self.metrics}
         if 'wordnet_pairwise_word_similarity_weighted' in metric_names or 'ngram_overlap_weighted' in metric_names or 'cosine_similarity_tfidf' in metric_names:
             self.word_idfs, self.sentence_tfidfs = self._compute_word_tfidfs(sentence_pairs)
@@ -48,6 +52,9 @@ class SentenceSimilarity:
         return output
 
     def run_sentence_similarity_metrics(self, metrics, sentence1, sentence2):
+        """
+        Compute for a sentence pair all metrics in the configuration.
+        """
         output = np.zeros(len(metrics))
         for index, metric in enumerate(metrics):
             output[index] = eval('self.' + metric['name'])(metric, sentence1, sentence2)
@@ -56,18 +63,26 @@ class SentenceSimilarity:
     # Auxiliary methods
 
     def _filter_content_words(self, sentence):
+        """
+        Filters all non-content words, leaving only verbs, nouns, adverbs and adjectives.
+        """
         return [sentence[2][i]
                 for i in range(len(sentence[3]))
                 if sentence[3][i][0] in ['V', 'N', 'R', 'J']]
 
     def _filter_stopwords(self, sentence):
+        """
+        Leaves only the english stopwords in a sentence.
+        """
         stopword_list = stopwords.words('english')
         return [word
                 for word in sentence[2]
                 if word in stopword_list]
 
     def _idf_process_sentence(self, sentence_id, sentence, corpus_word_apparitions, sentence_word_apparitions):
-        # compute df for each word and tf for each word and sentence
+        """
+        Computes document frequency for each word and term frequency for each word-sentence.
+        """
         sentence_word_apparitions[sentence_id] = {}
         for word in sentence[2]:
             if word not in corpus_word_apparitions:
@@ -81,8 +96,9 @@ class SentenceSimilarity:
         return corpus_word_apparitions, sentence_word_apparitions
 
     def _compute_word_tfidfs(self, sentence_pairs):
-        # TODO can be done in O(n), better than O(2n)
-
+        """
+        Computes Tf-idfs using all sentence pairs.
+        """
         # Compute word apparitions in the sentences
         corpus_word_apparitions = {}
         sentence_word_apparitions = {}
@@ -107,19 +123,35 @@ class SentenceSimilarity:
         return word_idfs, sentence_tfidfs
 
     def jaccard_similarity(self, config, sentence1, sentence2):
+        """
+        Computes simple Jaccard similarity with the token lists of two sentences.
+        Equivalent to word 1-gram similarity.
+        """
         return 1 - jaccard_distance(set(sentence1[2]), set(sentence2[2]))
 
     def jaccard_similarity_stemmer(self, config, sentence1, sentence2):
+        """
+        Computes stem unigram similarity.
+        """
         tokens1 = [self.stemmer.stem(token) for token in word_tokenize(sentence1[1]) if token not in self.punctuation_set]
         tokens2 = [self.stemmer.stem(token) for token in word_tokenize(sentence2[1]) if token not in self.punctuation_set]
         return 1 - jaccard_distance(set(tokens1), set(tokens2))
 
     def cosine_similarity_tfidf(self, config, sentence1, sentence2):
+        """
+        Computes the Tf-idf cosine distance between two sentences, using our own previously computed metric.
+        """
         id1 = str(self.index)  + '1'
         id2 = str(self.index) + '2'
         return 1 - spatial.distance.cosine(self.sentence_tfidfs[id1], self.sentence_tfidfs[id2])
 
     def ngram_overlap(self, config, sentence1, sentence2):
+        """
+        Computes the content, stopword or word n-gram similarity using the list of tokens.
+        Content: Using only the nouns, verbs, adverbs and adjectives of a sentence.
+        Stopwords: Using only the stopwords of a sentence.
+        Word: Using all tokens in a sentence, no filtering.
+        """
         n = config['n'] if 'n' in config else 1
         filter = config['filter'] if 'filter' in config else 'none'
 
@@ -149,6 +181,9 @@ class SentenceSimilarity:
             return 0
 
     def ngram_overlap_weighted(self, config, sentence1, sentence2):
+        """
+        Computes the n-gram similarities as ngram_overlap does, but adds a weighting factor using the Tf-idf.
+        """
         # TODO wrap inside the previous function
         n = config['n'] if 'n' in config else 1
         filter = config['filter'] if 'filter' in config else 'none'
@@ -180,6 +215,10 @@ class SentenceSimilarity:
             return 0
 
     def character_ngram_overlap(self, config, sentence1, sentence2):
+        """
+        Computes the character n-gram similarities. In other words, it extracts n-grams character by character instead
+        of word by word, using the original lowercased sentences.
+        """
         n = config['n'] if 'n' in config else 1
 
         s1 = sentence1[1]
@@ -201,6 +240,9 @@ class SentenceSimilarity:
             return 0
 
     def pos_ngram_overlap(self, config, sentence1, sentence2):
+        """
+        Computes the part of speech n-gram similarity using the previously computed PoS list of a sentence.
+        """
         n = config['n'] if 'n' in config else 1
 
         s1 = sentence1[3]
@@ -222,9 +264,20 @@ class SentenceSimilarity:
             return 0
 
     def sentence_length_difference(self, config, sentence1, sentence2):
+        """
+        Computes the absolute difference between the length in tokens of two sentences.
+        """
         return np.abs(len(sentence1[2]) - len(sentence2[2]))
 
     def wordnet_pairwise_word_similarity(self, config, sentence1, sentence2):
+        """
+        Computes the Wordnet-based pairwise word similarity. This function uses the Wordnet synsets for each sentence,
+        found with the Lesk algorithm in the preprocessing step.
+        For each synset of a sentence, it computes the Path, Leacock-Chodrow or Wu-Palmer similarities (depending on
+        configuration) with all synsets in the other sentence and stores the maximum similarity it founds. After storing
+        all maximum similarities of the two sentences in a pair, it computes the mean similarity of each sentence and
+        then the mean of the two sentence similarities.
+        """
         lch = lambda w1, w2: w1.lch_similarity(w2)
         path = lambda w1, w2: w1.path_similarity(w2)
         wup = lambda w1, w2: w1.wup_similarity(w2)
@@ -253,6 +306,10 @@ class SentenceSimilarity:
         return np.mean([score1, score2])
 
     def wordnet_pairwise_word_similarity_weighted(self, config, sentence1, sentence2):
+        """
+        Computes the Wordnet-based pairwise word similarity as wordnet_pairwise_word_similarity but adding a weighting
+        factor based in the computed Tf-idf when computing the synset similarities.
+        """
         # TODO wrap this function inside the prior one
         lch = lambda w1, w2: w1.lch_similarity(w2)
         path = lambda w1, w2: w1.path_similarity(w2)
@@ -282,6 +339,12 @@ class SentenceSimilarity:
         return np.mean([score1, score2])
 
     def wordnet_pairwise_word_similarity_weighted_all_possibilities(self, config, sentence1, sentence2):
+        """
+        Computes the Wordnet-based pairwise word similarity as wordnet_pairwise_word_similarity but instead of using
+        only the most likely synset for each word in the sentence extracted with the Lesk algorithm, it computes the
+        similarities using the 5 most likely synsets for each of the words (no Lesk used).
+        Originally it used ALL synsets for a word, changed to 5 synsets for efficiency purposes.
+        """
         lch = lambda w1, w2: w1.lch_similarity(w2)
         path = lambda w1, w2: w1.path_similarity(w2)
         wup = lambda w1, w2: w1.wup_similarity(w2)
@@ -318,6 +381,12 @@ class SentenceSimilarity:
         return np.mean([score1, score2])
 
     def number_overlap(self, config, sentence1, sentence2):
+        """
+        Computes the Jaccard distance between the sets of the cardinal numbers that appear in the two sentences.
+        It tries to parse numbers expressed in words (for example 'two', 'three hundreds and forty-nine'), numbers using
+        ',' (for example '16,432,970') and decimal numbers (for example '45,233.4123'). If the number can't be parsed,
+        it's added as the corresponding string to the set.
+        """
         numbers1 = []
         for i, word in enumerate(sentence1[2]):
             if sentence1[3][i] == 'CD':
@@ -349,7 +418,32 @@ class SentenceSimilarity:
         except ZeroDivisionError:
             return 0
 
+    def translation_similarity(self, config, sentence1, sentence2):
+        """
+        UNUSED METRIC
+        Computes the Jaccard similarity of two sentences after having translated them to German or Spanish and
+        to English again. It was going to use the result of the preprocessing step of translating the sentences, which
+        in the end was dropped.
+        """
+        lang = config['language'] if 'language' in config else 'de'
+        tokens1 = word_tokenize(sentence1[5 if lang == 'de' else 6])
+        tokens2 = word_tokenize(sentence2[5 if lang == 'de' else 6])
+
+        set1 = set(tokens1)
+        set2 = set(tokens2)
+        intersection = set1.intersection(set2)
+        sizei = len(intersection)
+        size1, size2 = len(set1), len(set2)
+        try:
+            return 2 * (1 / (size1 / sizei + size2 / sizei))
+        except ZeroDivisionError:
+            return 0
+
     def dependency_overlap(self, config, sentence1, sentence2):
+        """
+        Computes the Jaccard similarity between the sets of extracted dependencies between words in each sentence.
+        It uses the sentence in the form (word1, relation, word2) where the words have been lemmatized.
+        """
         content = config['content'] if 'content' in config else False
 
         dep = CoreNLPDependencyParser('http://localhost:9000')
@@ -378,11 +472,18 @@ class SentenceSimilarity:
             return 0
 
     def longest_common_subsequence(self, config, sentence1, sentence2):
+        """
+        Computes the length of the longest common subsequence or substring of the two sentences, depending on the
+        configuration.
+        L. C. Subsequence example:
+          ("We ate a delicious pizza", "We ate a not so delicious pizza") -> "We ate a delicious pizza"
+        L. C. Substring example:
+          ("We ate a delicious pizza", "We ate a not so delicious pizza") -> " delicious pizza"
+        """
         mode = config['mode'] if 'mode' in config else 'subsequence'
         if mode == 'subsequence':
             return pylcs.lcs(sentence1[1], sentence2[1])
         else:  # mode == 'substring'
             return pylcs.lcs2(sentence1[1], sentence2[1])
-
 
 
